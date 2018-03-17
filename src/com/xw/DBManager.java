@@ -23,9 +23,23 @@ public class DBManager {
 		try {
 			ExcelAPI excel = new ExcelAPI(new File("E:\\sw-default\\eclipse\\myworkspace\\ConvetExcelToSqlite\\test.xls"));
 			DBManager dbm = new DBManager();
-			dbm.connectDB();
+			dbm.connectDB();//connect to db
+			
+			HashMap<String,String> kv = new HashMap<>();
+			kv.put("aa", "bb");
+			dbm.put(kv);//put data from HashMap
+			
+			HashMap<String,String> condition = new HashMap<>();
+			condition.put("aa", "bb");//find record with aa='bb'
+			HashMap<String,String> result = new HashMap<>();
+			result.put("id", "");//find attribute 'id'
+			dbm.query(kv,result);//find record attribute 'id' with condition aa='bb'
 
-			dbm.closeDB();//关闭数据库连接
+			for(String i : result.keySet()) {
+				System.out.println("record "+i+": "+result.get(i));
+			}
+			
+			dbm.closeDB();//close db
 		
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -39,7 +53,7 @@ public class DBManager {
 		m_Connection = DriverManager.getConnection("jdbc:sqlite:test.db");
 		m_Statement=m_Connection.createStatement();
 		m_Statement.executeUpdate("drop table if exists test");
-		m_Statement.executeUpdate("create table test(id INT PRIMARY KEY NOT NULL)");
+		m_Statement.executeUpdate("create table test(id INTEGER PRIMARY KEY autoincrement)");
 	}
 	
 	public void closeDB() throws SQLException {
@@ -52,13 +66,13 @@ public class DBManager {
 		String sql3 = "')";
 		for(String i : kv.keySet()) {
 			if(column.add(i)) addColumn(i);
-			
+			System.out.println("putKV "+i+":"+kv.get(i));
 			sql1=sql1+i+",";
 			sql2=sql2+kv.get(i)+",";
 		}
 		m_Statement.executeUpdate(
-				sql1.substring(0, sql1.length()-2)+
-									sql2.substring(0, sql2.length()-2)+
+				sql1.substring(0, sql1.length()-1)+
+									sql2.substring(0, sql2.length()-1)+
 									sql3);
 	} 
 	
@@ -69,7 +83,7 @@ public class DBManager {
 			sql=sql+i+"="+kv.get(i) +" and";
 		}
 		ResultSet rSet = m_Statement.executeQuery("select * from test where "+
-				sql.substring(0, sql.length()-1-"and".length()));
+				sql.substring(0, sql.length()-"and".length()));
 		while(rSet.next()) {
 			rSet.getInt(0);
 			for(String i : kv.keySet()) {
@@ -84,30 +98,35 @@ public class DBManager {
 			sql=sql+i+"="+kv.get(i) +" and";
 		}
 		m_Statement.executeQuery("delete from test where "+
-				sql.substring(0, sql.length()-1-"and".length()));
+				sql.substring(0, sql.length()-"and".length()));
 	}
 	
+	
 	void addColumn(String col) throws SQLException {
-		m_Statement.executeUpdate("alter table test add column "+col);
+		m_Statement.executeUpdate("alter table test add column "+col+" text");
+		System.out.println("addColumn "+col);
 	}
-//	
-//	public HashMap<String,String> query(HashMap<String,String> kv) throws SQLException{
-//		String sql = "";
-//		for(String i : kv.keySet()) {
-//			sql=sql+i+"="+kv.get(i) +" and";
-//		}
-//		
-//		ResultSet rSet = m_Statement.executeQuery("select * from test where "+
-//				sql.substring(0, sql.length()-1-"and".length()));
-//		HashMap<String,String> result = new HashMap<>();
-//		while (rSet.next()) {
-//			rSet.
-//			
-//		}
-//		
-//		
-//		result.put(key, value)
-//	}
+
+	public HashMap<String,String> query(HashMap<String,String> condition,HashMap<String,String> kv) throws SQLException{
+		String sql = "";
+		for(String i : condition.keySet()) {
+			sql=sql+i+"='"+condition.get(i) +"' and";
+		}
+		
+		ResultSet rSet;
+
+		rSet = sql.equals("") ?
+				m_Statement.executeQuery("select * from test") :
+				m_Statement.executeQuery("select * from test where "+
+				sql.substring(0, sql.length()-"and".length()));
+		while (rSet.next()) {
+			for(String i : kv.keySet()) {
+				kv.replace(i, rSet.getString(i));
+			}
+		}
+		rSet.close();
+		return kv;
+	}
 	
 //	public void put(String key,String attribute,String value) throws Exception {
 //		if(keyCache.add(key)) {
