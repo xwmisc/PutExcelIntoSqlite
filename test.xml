@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+
+<TableList>
+<test>
+</test>
+<table_1>
+<column name="款项类型"/><column name="应收减少"/><column name="姓名"/><column name="应收增加"/><column name="日期"/></table_1>
+<table_2>
+<column name="款项类型"/><column name="应收减少"/><column name="姓名"/><column name="应收增加"/><column name="日期"/><column name="备注"/><column name="单据编号"/></table_2>
+</TableList>
+
+<Staff name="姜渊"/>
+<Staff name="ben"/>
+</root>
