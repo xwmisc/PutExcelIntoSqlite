@@ -11,6 +11,9 @@ public class MainClass {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		try {
+			ExcelAPI record = new ExcelAPI("E:\\360Download\\record.xls");
+			String excel_format = "";
+			int row = 1;
 
 			DBManager dbm = new DBManager("test.db");
 			dbm.cleanTable(Config.TABLE_1);
@@ -43,9 +46,6 @@ public class MainClass {
 			for (HashMap<String, String> day : dbm.query(Config.TABLE_2, null, new String[] { "日期" }))
 				day_set.add(day.get("日期"));
 
-			ExcelAPI record = new ExcelAPI("E:\\360Download\\record.xls");
-			String excel_format = "";
-			int row = 0;
 
 			HashMap<String, String> condition = new HashMap<>();
 			for (String each_staff : Config.getInstance().getStaffSet()) {
@@ -108,6 +108,8 @@ public class MainClass {
 
 				}
 			}
+			record.save();
+			record.close();
 			dbm.closeDB();
 
 		} catch (
@@ -127,11 +129,25 @@ public class MainClass {
 			throw new Exception("载入错误 " + fileName);
 
 		for (int i = 0; i < 6; i++) {
+			String text;
 			HashMap<String, String> kv = new HashMap<>();
 			kv.put("姓名", excel.read(base_row, base_column + 1).trim());
 			kv.put("日期", excel.read(base_row + 1, base_column + 1).trim());
-			kv.put("款项类型", excel.read(base_row + 3 + i, base_column).trim());
-			String text = excel.read(base_row + 3 + i, base_column + 1, true).trim();
+			text = excel.read(base_row + 3 + i, base_column).trim();
+			kv.put("款项类型", text);
+			if(text.equals("刷货差额")) {
+				text= excel.read(base_row + 3 + i, base_column + 1, true).trim();
+				text = text.equals("") ? "0" : text;
+				if(text.charAt(0) == '-') {
+					kv.put("应收增加", "0");
+					kv.put("应收减少", text);
+				}else {
+					kv.put("应收增加", text);
+					kv.put("应收减少", "0");
+				}
+			}
+			
+			text= excel.read(base_row + 3 + i, base_column + 1, true).trim();
 			kv.put("应收增加", text.equals("") ? "0" : text);
 			text = excel.read(base_row + 3 + i, base_column + 2, true).trim();
 			kv.put("应收减少", text.equals("") ? "0" : text);

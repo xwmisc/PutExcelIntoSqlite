@@ -55,7 +55,7 @@ public class Config {
 	}
 
 	void save() throws Exception {
-		System.out.println("Save config");
+		//System.out.println("Save config");
 		FileOutputStream os = new FileOutputStream(file);
 		os.write(document.asXML().getBytes());
 		os.flush();

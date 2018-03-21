@@ -29,7 +29,7 @@ public class ExcelAPI {
 
 	public static void main(String[] arg) {
 		try {
-			ExcelAPI excel = new ExcelAPI("E:\\360Download\\0301.xls");
+			ExcelAPI excel = new ExcelAPI("E:\\360Download\\record.xls");
 			System.out.println("=====SheetList");
 			for (String i : excel.getSheetList())
 				System.out.println(i);
@@ -58,16 +58,16 @@ public class ExcelAPI {
 	}
 
 	public ExcelAPI(String filePath) throws Exception {
+		System.out.println("filePath " + filePath);
 		File file = new File(filePath);
 		if (!file.exists()) {
 			m_WritableWorkbook = Workbook.createWorkbook(file);
 			m_WritableSheet = m_WritableWorkbook.createSheet("Sheet1", 0);
-			return;
+		} else {
+			m_Workbook = Workbook.getWorkbook(file);
+			tempFile = new File(filePath + "~");
+			m_WritableWorkbook = Workbook.createWorkbook(tempFile, m_Workbook);
 		}
-		m_Workbook = Workbook.getWorkbook(file);
-		tempFile = new File(filePath + "~");
-		tempFile.createNewFile();
-		m_WritableWorkbook = Workbook.createWorkbook(tempFile, m_Workbook);
 	}
 
 	public void openSheet(String name) {
@@ -79,8 +79,8 @@ public class ExcelAPI {
 	}
 
 	public void write(int row, int col, String text) throws Exception {
-		//System.out.println("write " + row + " " + col + text);
-		if (col >= m_WritableSheet.getColumns() || row >= m_WritableSheet.getRows()) {
+		 System.out.println(null==m_WritableSheet);
+		if (col < m_WritableSheet.getColumns() && row < m_WritableSheet.getRows()) {
 			m_WritableSheet.addCell(new Label(col, row, text));
 		} else if (m_WritableSheet.getWritableCell(col, row).getType() == CellType.LABEL) {
 			((Label) m_WritableSheet.getWritableCell(col, row)).setString(text);
@@ -88,7 +88,7 @@ public class ExcelAPI {
 	}
 
 	public void writeFormat(int base_row, int base_col, String text) throws Exception {
-		// System.out.println("writeFormat " + text);
+		System.out.println("writeFormat " + text);
 		int row = 0;
 		int col = 0;
 		String[] row_list = text.split(NEW_LINE);
@@ -110,7 +110,6 @@ public class ExcelAPI {
 	}
 
 	public void close() throws Exception {
-
 		m_WritableWorkbook.close();
 		if (null != m_Workbook)
 			m_Workbook.close();
