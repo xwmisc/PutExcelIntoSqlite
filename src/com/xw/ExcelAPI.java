@@ -25,7 +25,7 @@ public class ExcelAPI {
 	File tempFile;
 
 	public static final String DIV = "|";
-	public static final String NEW_LINE = "\n";
+	public static final String NEW_LINE = "newline";
 
 	public static void main(String[] arg) {
 		try {
@@ -40,7 +40,8 @@ public class ExcelAPI {
 			System.out.println("=====ReadFormat");
 			System.out.println("3x1|" + excel.read(3, 1, true));
 			System.out.println("=====Write");
-			excel.writeFormat(3, 1, "xxx" + DIV + "200" + DIV + NEW_LINE + "asf" + DIV + "w" + DIV + DIV + "2");
+			excel.writeFormat(3, 1,
+					"ben|0226|刷货开工费|-10000000|0|刷货差额|刷货退回|0|-4577150|刷货返点|刷货费用|刷货入库|0|-965360|0303|刷货开工费|刷货差额|刷货退回|刷货返点|刷货费用|刷货入库|0205|刷货开工费|刷货差额|刷货退回|刷货返点|刷货费用|刷货入库|0227|刷货开工费|刷货差额|刷货退回|刷货返点|刷货费用|刷货入库|0202|刷货开工费|刷货差额|刷货退回|刷货返点|刷货费用|刷货入库|0224|刷货开工费|刷货差额|刷货退回|刷货返点|刷货费用|刷货入库|0301|刷货开工费|刷货差额|刷货退回|刷货返点|刷货费用|刷货入库|0203|刷货开工费|-19900000|0|刷货差额|刷货退回|0|-887250|刷货返点|刷货费用|刷货入库|0|-3555744|0225|刷货开工费|-50000000|0|刷货差额|刷货退回|0|-2710600|刷货返点|刷货费用|");
 			excel.write(0, 0, "100" + DIV + "200" + DIV + NEW_LINE + "asf" + DIV + "w" + DIV + DIV + "2");
 			System.out.println("0x0|" + excel.read(0, 0, false));
 			System.out.println("3x1|" + excel.read(3, 1, false));
@@ -58,7 +59,6 @@ public class ExcelAPI {
 	}
 
 	public ExcelAPI(String filePath) throws Exception {
-		System.out.println("filePath " + filePath);
 		File file = new File(filePath);
 		if (!file.exists()) {
 			m_WritableWorkbook = Workbook.createWorkbook(file);
@@ -79,10 +79,13 @@ public class ExcelAPI {
 	}
 
 	public void write(int row, int col, String text) throws Exception {
-		 System.out.println(null==m_WritableSheet);
-		if (col < m_WritableSheet.getColumns() && row < m_WritableSheet.getRows()) {
-			m_WritableSheet.addCell(new Label(col, row, text));
-		} else if (m_WritableSheet.getWritableCell(col, row).getType() == CellType.LABEL) {
+		// if (col >= m_WritableSheet.getColumns() && row >= m_WritableSheet.getRows())
+		// {
+		System.out.println("write1 " + text);
+		m_WritableSheet.addCell(new Label(col, row, text));
+
+		if (m_WritableSheet.getWritableCell(col, row).getType() == CellType.LABEL) {
+			System.out.println("write2 " + text);
 			((Label) m_WritableSheet.getWritableCell(col, row)).setString(text);
 		}
 	}
@@ -93,11 +96,11 @@ public class ExcelAPI {
 		int col = 0;
 		String[] row_list = text.split(NEW_LINE);
 		for (String a_row : row_list) {
-			// System.out.println("row_list " + row_list);
+			System.out.println("row_list " + a_row);
 			String[] cell_list = a_row.split("\\" + DIV);
 			col = 0;
 			for (String a_cell : cell_list) {
-				// System.out.println("cell_list " + cell_list);
+				System.out.println("cell_list " + (base_row + row) + " " + (base_col + col) + " " + a_cell);
 				write(base_row + row, base_col + col, a_cell);
 				col++;
 			}

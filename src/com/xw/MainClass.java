@@ -11,22 +11,34 @@ public class MainClass {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		try {
-			ExcelAPI record = new ExcelAPI("E:\\360Download\\record.xls");
+			final String PATH_RECORD = "E:\\360Download\\record.xls";
+			final String PATH_ACCOUNT_FLODER = "C:\\Users\\acer-pc\\Documents\\WeChat Files\\wxid_qyi4s5vkakv222\\Files\\对账2月3月";
+			final String PATH_DISCOUNT = "C:\\Users\\acer-pc\\Documents\\WeChat Files\\wxid_qyi4s5vkakv222\\Files\\对账2月3月\\往来对账数据-2018_03_20-17_58_40.xls";
+
+			File record_file = new File(PATH_RECORD);
+			if (record_file.exists())
+				record_file.delete();
+
+			ExcelAPI record = new ExcelAPI(record_file.getAbsolutePath());
+			record.openSheet(record.getSheetList()[0]);
+
+			record.writeFormat(0, 0, "姓名" + ExcelAPI.DIV + "日期" + ExcelAPI.DIV + "款项类型" + ExcelAPI.DIV + "应收增加差额"
+					+ ExcelAPI.DIV + "应收减少差额");
 			String excel_format = "";
 			int row = 1;
 
 			DBManager dbm = new DBManager("test.db");
 			dbm.cleanTable(Config.TABLE_1);
 			dbm.cleanTable(Config.TABLE_2);
-			for (File file : new File("C:\\Users\\acer-pc\\Documents\\WeChat Files\\wxid_qyi4s5vkakv222\\Files\\对账2月3月").listFiles()) {
+			for (File file : new File(PATH_ACCOUNT_FLODER).listFiles()) {
 				if (file.getName().matches("[0-9]{4}折扣表.xls$")) {
 					System.out.println(file.getAbsolutePath());
 					addRecord1(dbm, file.getAbsolutePath());
 				}
 			}
-			
+
 			dbm.test(Config.TABLE_1);
-			addRecord2(dbm, "C:\\Users\\acer-pc\\Documents\\WeChat Files\\wxid_qyi4s5vkakv222\\Files\\对账2月3月\\往来对账数据-2018_03_20-17_58_40.xls");
+			addRecord2(dbm, PATH_DISCOUNT);
 			dbm.test(Config.TABLE_2);
 
 			String[] type = new String[] { "刷货开工费", "刷货差额", "刷货退回", "刷货返点", "刷货费用", "刷货入库" };
@@ -43,19 +55,20 @@ public class MainClass {
 			HashSet<String> day_set = new HashSet<>();
 			for (HashMap<String, String> day : dbm.query(Config.TABLE_1, null, new String[] { "日期" }))
 				day_set.add(day.get("日期"));
-			for (HashMap<String, String> day : dbm.query(Config.TABLE_2, null, new String[] { "日期" }))
-				day_set.add(day.get("日期"));
-
+			// for (HashMap<String, String> day : dbm.query(Config.TABLE_2, null, new
+			// String[] { "日期" }))
+			// day_set.add(day.get("日期"));
 
 			HashMap<String, String> condition = new HashMap<>();
 			for (String each_staff : Config.getInstance().getStaffSet()) {
 				condition.put("姓名", each_staff);
-				excel_format = excel_format + each_staff + ExcelAPI.DIV;
 				for (String each_day : day_set) {
 					condition.put("日期", each_day);
-					excel_format = excel_format + each_day + ExcelAPI.DIV;
 					for (String each_type : type) {
 						condition.put("款项类型", each_type);
+						excel_format = "";
+						excel_format = excel_format + each_staff + ExcelAPI.DIV;
+						excel_format = excel_format + each_day + ExcelAPI.DIV;
 						excel_format = excel_format + each_type + ExcelAPI.DIV;
 
 						count1.put("应收增加", new BigDecimal(0));
@@ -73,14 +86,6 @@ public class MainClass {
 							count1.put("应收减少", count1.get("应收减少").add(new BigDecimal(num)));
 						}
 						for (HashMap<String, String> i : dbm.query(Config.TABLE_2, condition, item)) {
-							// System.out.println("!"+i.get("应收增加"));
-							// System.out.println(count.get("应收增加"));
-							// System.out.println(i.get("应收增加"));
-							// System.out.println(BigDecimal.valueOf(Double.valueOf(i.get("应收增加"))).toString());
-							// System.out.println("!"+i.get("应收增加"));
-							// System.out.println("!"+Double.valueOf(i.get("应收增加")));
-							// System.out.println("!"+new
-							// BigDecimal(Double.valueOf(i.get("应收增加"))).toString());
 							double num;
 							String value;
 							value = i.get("应收增加");
@@ -99,10 +104,12 @@ public class MainClass {
 							record.writeFormat(row++, 0, excel_format);
 						}
 
-						System.out.println("|日期|" + each_day + "|姓名|" + each_staff + "|款项类型|" + each_type + "|应收增加|"
-								+ count1.get("应收增加").toString());
-						System.out.println("|日期|" + each_day + "|姓名|" + each_staff + "|款项类型|" + each_type + "|应收减少|"
-								+ count1.get("应收减少").toString());
+						// System.out.println("|日期|" + each_day + "|姓名|" + each_staff + "|款项类型|" +
+						// each_type + "|应收增加|"
+						// + count1.get("应收增加").toString());
+						// System.out.println("|日期|" + each_day + "|姓名|" + each_staff + "|款项类型|" +
+						// each_type + "|应收减少|"
+						// + count1.get("应收减少").toString());
 
 					}
 
@@ -135,19 +142,19 @@ public class MainClass {
 			kv.put("日期", excel.read(base_row + 1, base_column + 1).trim());
 			text = excel.read(base_row + 3 + i, base_column).trim();
 			kv.put("款项类型", text);
-			if(text.equals("刷货差额")) {
-				text= excel.read(base_row + 3 + i, base_column + 1, true).trim();
+			if (text.equals("刷货差额")) {
+				text = excel.read(base_row + 3 + i, base_column + 1, true).trim();
 				text = text.equals("") ? "0" : text;
-				if(text.charAt(0) == '-') {
+				if (text.charAt(0) == '-') {
 					kv.put("应收增加", "0");
 					kv.put("应收减少", text);
-				}else {
+				} else {
 					kv.put("应收增加", text);
 					kv.put("应收减少", "0");
 				}
 			}
-			
-			text= excel.read(base_row + 3 + i, base_column + 1, true).trim();
+
+			text = excel.read(base_row + 3 + i, base_column + 1, true).trim();
 			kv.put("应收增加", text.equals("") ? "0" : text);
 			text = excel.read(base_row + 3 + i, base_column + 2, true).trim();
 			kv.put("应收减少", text.equals("") ? "0" : text);
