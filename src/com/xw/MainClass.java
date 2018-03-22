@@ -11,9 +11,9 @@ public class MainClass {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		try {
-			final String PATH_RECORD = "C:\\test\\result.xls";
-			final String PATH_ACCOUNT_FLODER = "C:\\workspace\\github\\PutExcelIntoSqlite\\对账2月3月";
-			final String PATH_DISCOUNT = "C:\\workspace\\github\\PutExcelIntoSqlite\\对账2月3月\\往来对账数据-2018_03_22-14_35_01.xls";
+			final String PATH_RECORD = "C:\\workspace\\result.xls";
+			final String PATH_ACCOUNT_FLODER = "C:\\workspace\\对账2月3月";
+			final String PATH_DISCOUNT = "C:\\workspace\\对账2月3月\\往来对账数据-2018_03_22-14_35_01.xls";
 
 			File record_file = new File(PATH_RECORD);
 			if (record_file.exists())
@@ -218,8 +218,9 @@ public class MainClass {
 			// 合法性验证
 			String remark = FJ.convert(excel.read(row, 10).trim(), 0);
 			boolean valid = false;
+			HashSet<String> namelist = Config.getInstance().getStaffSet();
 			for (String j : Config.getInstance().getStaffSet()) {
-				if (remark.matches("[0-9]{4} (刷货).{2,4} (" + j + ")")) {
+				if (remark.matches("[0-9]{4} (刷货).{2,4} (" + j + ").*")) {
 					valid = true;
 					break;
 				}
