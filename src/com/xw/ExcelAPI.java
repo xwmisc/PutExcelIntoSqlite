@@ -62,7 +62,8 @@ public class ExcelAPI {
 		File file = new File(filePath);
 		if (!file.exists()) {
 			m_WritableWorkbook = Workbook.createWorkbook(file);
-			m_WritableSheet = m_WritableWorkbook.createSheet("Sheet1", 0);
+			m_WritableSheet = m_WritableWorkbook.createSheet("对账结果", 0);
+			m_WritableSheet = m_WritableWorkbook.createSheet("应收检查", 1);
 		} else {
 			m_Workbook = Workbook.getWorkbook(file);
 			tempFile = new File(filePath + "~");
@@ -78,6 +79,11 @@ public class ExcelAPI {
 		return m_WritableWorkbook.getSheetNames();
 	}
 
+	public WritableSheet getSheet(String sheetName) {
+		return m_WritableWorkbook.getSheet(sheetName);
+	}
+	
+	
 	public void write(int row, int col, String text) throws Exception {
 		// if (col >= m_WritableSheet.getColumns() && row >= m_WritableSheet.getRows())
 		// {

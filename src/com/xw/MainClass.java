@@ -11,21 +11,27 @@ public class MainClass {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		try {
-			final String PATH_RECORD = "E:\\360Download\\record.xls";
-			final String PATH_ACCOUNT_FLODER = "C:\\Users\\acer-pc\\Documents\\WeChat Files\\wxid_qyi4s5vkakv222\\Files\\对账2月3月";
-			final String PATH_DISCOUNT = "C:\\Users\\acer-pc\\Documents\\WeChat Files\\wxid_qyi4s5vkakv222\\Files\\对账2月3月\\往来对账数据-2018_03_20-17_58_40.xls";
+			final String PATH_RECORD = "C:\\test\\result.xls";
+			final String PATH_ACCOUNT_FLODER = "C:\\workspace\\github\\PutExcelIntoSqlite\\对账2月3月";
+			final String PATH_DISCOUNT = "C:\\workspace\\github\\PutExcelIntoSqlite\\对账2月3月\\往来对账数据-2018_03_22-14_35_01.xls";
 
 			File record_file = new File(PATH_RECORD);
 			if (record_file.exists())
 				record_file.delete();
 
 			ExcelAPI record = new ExcelAPI(record_file.getAbsolutePath());
+			String[] sheetlist = record.getSheetList();
 			record.openSheet(record.getSheetList()[0]);
-
 			record.writeFormat(0, 0, "姓名" + ExcelAPI.DIV + "日期" + ExcelAPI.DIV + "款项类型" + ExcelAPI.DIV + "应收增加差额"
-					+ ExcelAPI.DIV + "应收减少差额");
+					+ ExcelAPI.DIV + "应收减少差额");			
+			
+			record.openSheet(record.getSheetList()[1]);
+			record.writeFormat(0, 0, "日期" + ExcelAPI.DIV + "姓名" + ExcelAPI.DIV + "应收增加合计" + ExcelAPI.DIV + "营收减少合计");		
+			
+			
 			String excel_format = "";
 			int row = 1;
+			int row_res2 = 1;
 
 			DBManager dbm = new DBManager("test.db");
 			dbm.cleanTable(Config.TABLE_1);
@@ -58,12 +64,13 @@ public class MainClass {
 			// for (HashMap<String, String> day : dbm.query(Config.TABLE_2, null, new
 			// String[] { "日期" }))
 			// day_set.add(day.get("日期"));
-
+			
 			HashMap<String, String> condition = new HashMap<>();
 			for (String each_staff : Config.getInstance().getStaffSet()) {
 				condition.put("姓名", each_staff);
 				for (String each_day : day_set) {
 					condition.put("日期", each_day);
+					double receivable_incr = 0, receivable_decr = 0 ;
 					for (String each_type : type) {
 						condition.put("款项类型", each_type);
 						excel_format = "";
@@ -72,19 +79,27 @@ public class MainClass {
 						excel_format = excel_format + each_type + ExcelAPI.DIV;
 
 						count1.put("应收增加", new BigDecimal(0));
-						count1.put("应收减少", new BigDecimal(0));
+						count1.put("应收减少", new BigDecimal(0)); 
 						count2.put("应收增加", new BigDecimal(0));
 						count2.put("应收减少", new BigDecimal(0));
+						ArrayList<HashMap<String, String>> jjjj = dbm.query(Config.TABLE_1, condition, item);
 						for (HashMap<String, String> i : dbm.query(Config.TABLE_1, condition, item)) {
 							double num;
 							String value;
 							value = i.get("应收增加");
 							num = Double.valueOf(null == value || value.equals("") ? "0" : value);
+							receivable_incr += num;
 							count1.put("应收增加", count1.get("应收增加").add(new BigDecimal(num)));
 							value = i.get("应收减少");
 							num = Double.valueOf(null == value || value.equals("") ? "0" : value);
 							count1.put("应收减少", count1.get("应收减少").add(new BigDecimal(num)));
+							receivable_decr += num;
+							
+							
 						}
+						
+
+						
 						for (HashMap<String, String> i : dbm.query(Config.TABLE_2, condition, item)) {
 							double num;
 							String value;
@@ -97,6 +112,7 @@ public class MainClass {
 						}
 						if (!count1.get("应收增加").equals(count2.get("应收增加"))
 								|| !count1.get("应收减少").equals(count2.get("应收减少"))) {
+							record.openSheet(record.getSheetList()[0]);
 							excel_format = excel_format + count1.get("应收增加").subtract(count2.get("应收增加")).toString()
 									+ ExcelAPI.DIV;
 							excel_format = excel_format + count1.get("应收减少").subtract(count2.get("应收减少")).toString()
@@ -112,7 +128,21 @@ public class MainClass {
 						// + count1.get("应收减少").toString());
 
 					}
+					if(receivable_incr != receivable_decr) {
+						excel_format = "";
+						excel_format = excel_format + each_day + ExcelAPI.DIV;
+						excel_format = excel_format + each_staff + ExcelAPI.DIV;
 
+						record.openSheet(record.getSheetList()[1]);
+						
+						excel_format = excel_format + Double.toString(receivable_incr) + ExcelAPI.DIV;
+						excel_format = excel_format + Double.toString(receivable_decr) + ExcelAPI.DIV;
+
+						record.writeFormat(row_res2++, 0, excel_format);
+					}
+					
+					
+					
 				}
 			}
 			record.save();
@@ -128,12 +158,15 @@ public class MainClass {
 	}
 
 	public static void addRecord1(DBManager dbm, String fileName) throws Exception {
-		ExcelAPI excel = new ExcelAPI(fileName);
-		excel.openSheet(excel.getSheetList()[0]);
+ 		ExcelAPI excel = new ExcelAPI(fileName);
+		
+		for(String sheet_index: excel.getSheetList()) {
+		excel.openSheet(sheet_index);
 		int base_row = 0;
 		int base_column = 0;
 		if (!Config.getInstance().getStaffSet().contains(excel.read(base_row, base_column + 1)))
-			throw new Exception("载入错误 " + fileName);
+			continue;
+//			throw new Exception("载入错误 " + fileName);
 
 		for (int i = 0; i < 6; i++) {
 			String text;
@@ -159,6 +192,7 @@ public class MainClass {
 			text = excel.read(base_row + 3 + i, base_column + 2, true).trim();
 			kv.put("应收减少", text.equals("") ? "0" : text);
 			dbm.put(Config.TABLE_1, kv);
+		}
 		}
 		excel.close();
 	}
