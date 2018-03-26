@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -35,6 +36,27 @@ public class DBManager {
 					kv.put("数据" + j, "value-" + j);
 				dbm.put("test", kv);
 			}
+			System.out.println("=====x");
+			Date date = new Date();
+			String sql1 = "insert into test(数据3,数据4) values('sdasdas','ffffff');";
+			sql1=sql1+sql1;
+			sql1=sql1+sql1;
+			sql1=sql1+sql1;
+			sql1=sql1+sql1;
+			sql1=sql1+sql1;
+			sql1=sql1+sql1;
+			sql1=sql1+sql1;
+			sql1=sql1+sql1;
+			sql1=sql1+sql1;
+			sql1=sql1+sql1;
+			sql1=sql1+sql1;
+			sql1=sql1+sql1;
+			System.out.println("sql|"+sql1);
+			System.out.println("xx1|"+(new Date().getTime()-date.getTime()));
+			dbm.m_Statement.executeUpdate(sql1);
+			dbm.m_Connection.commit();
+			System.out.println("xx2|"+(new Date().getTime()-date.getTime()));
+			System.out.println("=====xend");
 			dbm.test("test");
 			System.out.println("=====modify");
 			HashMap<String, String> condition = new HashMap<>();
@@ -103,6 +125,7 @@ public class DBManager {
 	public DBManager(String FileName) throws Exception {
 		Class.forName("org.sqlite.JDBC");
 		m_Connection = DriverManager.getConnection("jdbc:sqlite:" + FileName);
+		m_Connection.setAutoCommit(false);
 		m_Statement = m_Connection.createStatement();
 		cleanTable("test");
 		initColumnCache();
@@ -110,6 +133,7 @@ public class DBManager {
 	}
 
 	public void put(String tableName, HashMap<String, String> kv) throws Exception {
+
 		String sql1 = "insert into " + tableName + "(";
 		String sql2 = ") values(";
 		String sql3 = ")";
@@ -120,8 +144,9 @@ public class DBManager {
 			sql1 = sql1 + i + ",";
 			sql2 = sql2 + "'" + kv.get(i) + "',";
 		}
-		if(LOG_STATE)System.out.println("sql " + sql1.substring(0, sql1.length() - 1) + sql2.substring(0, sql2.length() - 1) + sql3);
-		m_Statement.executeUpdate(sql1.substring(0, sql1.length() - 1) + sql2.substring(0, sql2.length() - 1) + sql3);
+		String sql = sql1.substring(0, sql1.length() - 1) + sql2.substring(0, sql2.length() - 1) + sql3;
+		if(LOG_STATE)System.out.println("sql " + sql);
+		m_Statement.executeUpdate(sql);
 	}
 
 	public void modify(String tableName, HashMap<String, String> condition, HashMap<String, String> kv)
@@ -163,7 +188,11 @@ public class DBManager {
 	}
 
 	public void closeDB() throws SQLException {
+		m_Connection.commit();// 提交
 		m_Connection.close();// 关闭数据库连接
+	}
+	public void commit() throws SQLException {
+		m_Connection.commit();// 提交
 	}
 
 	public void test(String tableName) throws Exception {
