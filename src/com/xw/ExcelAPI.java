@@ -4,10 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.xw.exception.ExcelException;
 
 import jxl.*;
 import jxl.format.CellFormat;
+import jxl.read.biff.BiffException;
 import jxl.write.Label;
 import jxl.write.Number;
 import jxl.write.NumberFormat;
@@ -38,15 +44,26 @@ public class ExcelAPI {
 			excel.openSheet(excel.getSheetList()[0]);
 			System.out.println("=====Read");
 			System.out.println("3x1|" + excel.read(3, 1));
-			System.out.println("=====ReadFormat");
-			System.out.println("3x1|" + excel.read(3, 1, true));
+			System.out.println("=====ReadDate");
+			try {
+				System.out.println("0x0|" + excel.readDate(0, 0));
+			} catch (ClassCastException e) {
+				System.out.println("=====ReadDateFix"
+						+ new Date((long) ((excel.readNumber(0, 0) - 25568 - 1) * 1000l * 60 * 60 * 24)).toGMTString());
+				// Matcher m = Pattern.compile("([0-9]+)月([0-9]+)日").matcher(excel.read(0, 0));
+				// System.out.println("=====ReadDateFix"+excel.read(0, 0));
+				// System.out.println(m.group(1)+"月"+m.group(2)+"日");
+
+			}
+			System.out.println("=====ReadNumber");
+			System.out.println("3x1|" + excel.readNumber(3, 1));
 			System.out.println("=====Write");
 			excel.writeFormat(1, 1,
 					"ben|0226|刷货开工费|-10000000|0|刷货差额|刷货退回|0|-4577150|刷货返点|刷货费用|刷货入库|0|-965360|0303|刷货开工费|刷货差额|刷货退回|刷货返点|刷货费用|刷货入库|0205|刷货开工费|刷货差额|刷货退回|刷货返点|刷货费用|刷货入库|0227|刷货开工费|刷货差额|刷货退回|刷货返点|刷货费用|刷货入库|0202|刷货开工费|刷货差额|刷货退回|刷货返点|刷货费用|刷货入库|0224|刷货开工费|刷货差额|刷货退回|刷货返点|刷货费用|刷货入库|0301|刷货开工费|刷货差额|刷货退回|刷货返点|刷货费用|刷货入库|0203|刷货开工费|-19900000|0|刷货差额|刷货退回|0|-887250|刷货返点|刷货费用|刷货入库|0|-3555744|0225|刷货开工费|-50000000|0|刷货差额|刷货退回|0|-2710600|刷货返点|刷货费用|");
-			System.out.println("1x1|" + excel.read(1, 1, false));
-			System.out.println("1x3|" + excel.read(1, 3, false));
+			System.out.println("1x1|" + excel.read(1, 1));
+			System.out.println("1x3|" + excel.read(1, 3));
 			excel.save();
-			System.out.println("1x4|" + excel.read(1, 4, true));
+			System.out.println("1x4|" + excel.readNumber(1, 4));
 			System.out.println("=====save");
 			excel.save();
 			System.out.println("=====close");
@@ -58,17 +75,35 @@ public class ExcelAPI {
 
 	}
 
-	public ExcelAPI(String filePath) throws Exception {
-		
+	public ExcelAPI(String filePath, String[] newSheetName) throws IOException, ExcelException {
+
+		if (null == filePath)
+			throw new IllegalArgumentException("filename is null");
 		File file = new File(filePath);
+
 		if (!file.exists()) {
 			m_WritableWorkbook = Workbook.createWorkbook(file);
-			m_WritableSheet = m_WritableWorkbook.createSheet("Sheet1", 0);
+			if (null == newSheetName)
+				throw new IllegalArgumentException("newSheetName is null");
+
+			for (int i = 0; i < newSheetName.length; i++)
+				m_WritableWorkbook.createSheet(newSheetName[i], i);
+
+			openSheet(newSheetName[0]);
 		} else {
-			m_Workbook = Workbook.getWorkbook(file);
+			try {
+				m_Workbook = Workbook.getWorkbook(file);
+			} catch (BiffException e) {
+				e.printStackTrace();
+				throw new ExcelException(e.getMessage());
+			}
 			tempFile = new File(filePath + "~");
 			m_WritableWorkbook = Workbook.createWorkbook(tempFile, m_Workbook);
 		}
+	}
+
+	public ExcelAPI(String filePath) throws IOException, ExcelException {
+		this(filePath, new String[] { "sheet1" });
 	}
 
 	public void openSheet(String name) {
@@ -79,29 +114,28 @@ public class ExcelAPI {
 		return m_WritableWorkbook.getSheetNames();
 	}
 
-	public void write(int row, int col, String text) throws Exception {
-		// if (col >= m_WritableSheet.getColumns() && row >= m_WritableSheet.getRows())
-		// {
-//		System.out.println("write1 " + text);
-		m_WritableSheet.addCell(new Label(col, row, text));
+	public void write(int row, int col, String text) throws ExcelException {
+		try {
+			m_WritableSheet.addCell(new Label(col, row, text));
+		} catch (WriteException e) {
+			e.printStackTrace();
+			throw new ExcelException(e.getMessage());
+		}
 
 		if (m_WritableSheet.getWritableCell(col, row).getType() == CellType.LABEL) {
-//			System.out.println("write2 " + text);
 			((Label) m_WritableSheet.getWritableCell(col, row)).setString(text);
 		}
 	}
 
-	public void writeFormat(int base_row, int base_col, String text) throws Exception {
-//		System.out.println("writeFormat " + text);
+	public void writeFormat(int base_row, int base_col, String text) throws ExcelException {
+		// System.out.println("writeFormat " + text);
 		int row = 0;
 		int col = 0;
 		String[] row_list = text.split(NEW_LINE);
 		for (String a_row : row_list) {
-//			System.out.println("row_list " + a_row);
 			String[] cell_list = a_row.split("\\" + DIV);
 			col = 0;
 			for (String a_cell : cell_list) {
-//				System.out.println("cell_list " + (base_row + row) + " " + (base_col + col) + " " + a_cell);
 				write(base_row + row, base_col + col, a_cell);
 				col++;
 			}
@@ -113,35 +147,58 @@ public class ExcelAPI {
 		m_WritableWorkbook.write();
 	}
 
-	public void close() throws Exception {
-		m_WritableWorkbook.close();
+	public void close() throws ExcelException, IOException {
+		try {
+			m_WritableWorkbook.close();
+		} catch (WriteException e) {
+			e.printStackTrace();
+			throw new ExcelException(e.getMessage());
+		}
 		if (null != m_Workbook)
 			m_Workbook.close();
 		if (null != tempFile && tempFile.exists())
 			tempFile.delete();
 	}
 
-	// 调整数值类型的单元格格式,不要逗号
-	public String read(int row, int col, boolean formatValue) throws IOException {
-		
-		if (col >= m_WritableSheet.getColumns() || row >= m_WritableSheet.getRows())
-			return "";
-
-		if (formatValue) {
-			try {
-				WritableCell cell = m_WritableSheet.getWritableCell(col, row);
-//				System.out.println("value " + ((NumberCell) cell).getValue());
-				BigDecimal big = new BigDecimal(((NumberCell) cell).getValue());
-				return big.toString();
-			} catch (ClassCastException e) {
-//				System.out.println("value2 " +m_WritableSheet.getWritableCell(col, row).getContents());
-				return m_WritableSheet.getWritableCell(col, row).getContents();
-			}
-		}
-		return m_WritableSheet.getCell(col, row).getContents();
+	public void freezeRow() {
+		m_WritableSheet.getSettings().setVerticalFreeze(1);
 	}
 
 	public String read(int row, int col) throws IOException {
-		return read(row, col, false);
+		if (col >= m_WritableSheet.getColumns() || row >= m_WritableSheet.getRows())
+			return "";
+
+		return m_WritableSheet.getCell(col, row).getContents();
+	}
+
+	public double readNumber(int row, int col) throws IOException, ExcelException {
+		if (col >= m_WritableSheet.getColumns() || row >= m_WritableSheet.getRows())
+			return 0;
+
+		WritableCell cell = m_WritableSheet.getWritableCell(col, row);
+		double num;
+		try {
+			num = ((NumberCell) cell).getValue();
+		} catch (ClassCastException e) {
+			e.printStackTrace();
+			throw new ExcelException(e.getMessage());
+		}
+		return num;
+	}
+
+	public Date readDate(int row, int col) throws IOException, ExcelException {
+		if (col >= m_WritableSheet.getColumns() || row >= m_WritableSheet.getRows())
+			return null;
+		// Calendar calendar = Calendar.getInstance();
+		// System.out.println("22|"+calendar.get(Calendar.DATE));
+
+		WritableCell cell = m_WritableSheet.getWritableCell(col, row);
+		Date date;
+		if (cell.getClass().equals(Number.class)) {
+			date = new Date((long) ((readNumber(row, col) - 25568 - 1) * 1000l * 60 * 60 * 24));
+		} else {
+			date = ((DateCell) cell).getDate();
+		}
+		return date;
 	}
 }
