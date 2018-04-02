@@ -177,12 +177,9 @@ public class ExcelAPI {
 
 		WritableCell cell = m_WritableSheet.getWritableCell(col, row);
 		double num;
-		try {
+
 			num = ((NumberCell) cell).getValue();
-		} catch (ClassCastException e) {
-			e.printStackTrace();
-			throw new ExcelException(e.getMessage());
-		}
+
 		return num;
 	}
 
