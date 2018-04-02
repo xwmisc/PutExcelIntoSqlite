@@ -51,12 +51,12 @@ public class GUI {
 	private Combo combo;
 
 	public static GUI getInstance() {
-		if(m_instance==null) {
+		if (m_instance == null) {
 			m_instance = new GUI();
 		}
 		return m_instance;
 	}
-	
+
 	/**
 	 * Launch the application.
 	 * 
@@ -70,13 +70,32 @@ public class GUI {
 			e.printStackTrace();
 		}
 	}
-	
-	public void showErrDialog(String message) {
-		int style = SWT.APPLICATION_MODAL | SWT.ERROR ;  
-        MessageBox messageBox = new MessageBox(shell, style);  
-		messageBox.setText("Error Occurred!");  
-		messageBox.setMessage(message);  
-		messageBox.open();
+
+	public void showErrDialog(String err) {
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				int style = SWT.APPLICATION_MODAL | SWT.ERROR;
+				MessageBox messageBox = new MessageBox(shell, style);
+				messageBox.setText("Error Occurred!");
+				messageBox.setMessage(err);
+				messageBox.open();
+			}
+		});
+
+	}
+	public void showMsgDialog(String message) {
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				int style = SWT.APPLICATION_MODAL | SWT.YES;
+				MessageBox messageBox = new MessageBox(shell, style);
+				messageBox.setText("Tip");
+				messageBox.setMessage(message);
+				messageBox.open();
+			}
+		});
+
 	}
 
 	/**
@@ -282,7 +301,6 @@ public class GUI {
 		btnSearch.setBounds(124, 198, 108, 30);
 		btnSearch.setText("检索");
 
-
 	}
 
 	void run(final Runnable r1, final Runnable r2) {
@@ -398,8 +416,6 @@ public class GUI {
 
 		public void show() {
 			clearAll();
-			System.out.println(data_source == null);
-			System.out.println(combo == null);
 			data_source.getData(combo.getText()).forEach(data -> {
 				addItems(data);
 			});
