@@ -64,15 +64,15 @@ public class MainClass {
 
 			System.out.println("xt1|" + (new Date().getTime() - date.getTime()));
 			for (File file : new File(PATH_ACCOUNT_FLODER).listFiles()) {
-				if (file.getName().matches("[0-9]{4}折扣表.xls$")) {
+				if (file.getName().matches("[0-9]{4}折扣表\\.xls$")) {
 					System.out.println("折扣表" + file.getAbsolutePath());
 					addRecord1(dbm, file.getAbsolutePath());
 				}
-				if (file.getName().matches("往来对账数据.*.xls$")) {
+				if (file.getName().matches("往来对账数据.*\\.xls$")) {
 					System.out.println("对账表" + file.getAbsolutePath());
 					addRecord2(dbm, file.getAbsolutePath());
 				}
-				if (file.getName().matches("返点收入余额表.*.xls$")) {
+				if (file.getName().matches("返点收入余额表.*\\.xls$")) {
 					System.out.println("返点收入余额表" + file.getAbsolutePath());
 					addRecord3(dbm, file.getAbsolutePath());
 				}
@@ -99,6 +99,7 @@ public class MainClass {
 				day_set.add(day.get("日期"));
 
 			System.out.println("xt4|" + (new Date().getTime() - date.getTime()));
+			
 			HashMap<String, String> condition = new HashMap<>();
 			for (String each_staff : Config.getInstance().getStaffSet()) {
 				condition.put("姓名", each_staff);
@@ -302,7 +303,7 @@ public class MainClass {
 		int row = 9 + i - 1;
 		while (true) {
 			try {
-				if (!(excel.readNumber(row, 0) == i)) {
+				if (excel.readNumber(row, 0) == 0) {
 					break;
 				}
 			} catch (ClassCastException e) {
@@ -327,12 +328,12 @@ public class MainClass {
 				kv.put("应收增加", excel.read(row, 4));
 				kv.put("应收减少", excel.read(row, 5));
 				kv.put("备注", excel.read(row, 10));
-				// System.out.println("ValidData:|" + "i:" + i + "|" + excel.read(row, 0) + "|"
-				// + remark);
+				 System.out.println("ValidData:|" + "i:" + i + "|" + excel.read(row, 0) + "|"
+				 + remark);
 				dbm.put(Config.TABLE_2, kv);
 			} else {
-				// System.out.println("IgnoreError|" + "i:" + i + "|" + excel.read(row, 0) + "|"
-				// + remark);
+				 System.out.println("IgnoreError|" + "i:" + i + "|" + excel.read(row, 0) + "|"
+				 + remark);
 			}
 			i++;
 			row = 9 + i - 1;
