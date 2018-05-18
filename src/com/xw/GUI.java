@@ -50,6 +50,196 @@ public class GUI {
 	private TableManager table_manager;
 	private Combo combo;
 
+	/**
+	 * Create contents of the window.
+	 */
+	protected void createContents() {
+		shell = new Shell();
+		shell.setSize(839, 891);
+		shell.setText("SWT Application");
+	
+		text01 = new Text(shell, SWT.BORDER | SWT.H_SCROLL | SWT.CANCEL);
+		text01.setText("C:\\Users\\acer-pc\\Documents\\WeChat Files\\wxid_qyi4s5vkakv222\\Files\\对账2月3月(1)");
+		text01.setToolTipText("对账单文件夹 填入或拖入文件夹");
+		text01.setBounds(10, 63, 412, 47);
+	
+		DropTarget dropTarget = new DropTarget(text01, DND.DROP_NONE);
+		Transfer[] transfer = new Transfer[] { FileTransfer.getInstance() };
+		dropTarget.setTransfer(transfer);
+		dropTarget.addDropListener(new DropTargetListener() {
+	
+			@Override
+			public void dragEnter(DropTargetEvent arg0) {
+				// TODO Auto-generated method stub
+	
+			}
+	
+			@Override
+			public void dragLeave(DropTargetEvent arg0) {
+				// TODO Auto-generated method stub
+	
+			}
+	
+			@Override
+			public void dragOperationChanged(DropTargetEvent arg0) {
+				// TODO Auto-generated method stub
+	
+			}
+	
+			@Override
+			public void dragOver(DropTargetEvent arg0) {
+				// TODO Auto-generated method stub
+	
+			}
+	
+			@Override
+			public void drop(DropTargetEvent arg0) {
+				// TODO Auto-generated method stub
+				String[] files = (String[]) arg0.data;
+				text01.setText(files[0]);
+			}
+	
+			@Override
+			public void dropAccept(DropTargetEvent arg0) {
+				// TODO Auto-generated method stub
+	
+			}
+		});
+	
+		text02 = new Text(shell, SWT.BORDER | SWT.H_SCROLL | SWT.CANCEL);
+		text02.setText("C:\\Users\\acer-pc\\Documents\\WeChat Files\\wxid_qyi4s5vkakv222\\Files\\对账2月3月(1)");
+		text02.setToolTipText("对账单文件夹 填入或拖入文件夹");
+		text02.setBounds(10, 142, 412, 47);
+	
+		DropTarget dropTarget02 = new DropTarget(text02, DND.DROP_NONE);
+		Transfer[] transfer02 = new Transfer[] { FileTransfer.getInstance() };
+		dropTarget02.setTransfer(transfer02);
+		dropTarget02.addDropListener(new DropTargetListener() {
+	
+			@Override
+			public void dragEnter(DropTargetEvent arg0) {
+				// TODO Auto-generated method stub
+	
+			}
+	
+			@Override
+			public void dragLeave(DropTargetEvent arg0) {
+				// TODO Auto-generated method stub
+	
+			}
+	
+			@Override
+			public void dragOperationChanged(DropTargetEvent arg0) {
+				// TODO Auto-generated method stub
+	
+			}
+	
+			@Override
+			public void dragOver(DropTargetEvent arg0) {
+				// TODO Auto-generated method stub
+	
+			}
+	
+			@Override
+			public void drop(DropTargetEvent arg0) {
+				// TODO Auto-generated method stub
+				String[] files = (String[]) arg0.data;
+				text02.setText(files[0]);
+			}
+	
+			@Override
+			public void dropAccept(DropTargetEvent arg0) {
+				// TODO Auto-generated method stub
+	
+			}
+		});
+	
+		Label lblNewLabel = new Label(shell, SWT.NONE);
+		lblNewLabel.setBounds(10, 10, 224, 20);
+		lblNewLabel.setText("通过填写或拖拽来指定文件夹");
+	
+		Button button = new Button(shell, SWT.NONE);
+		button.addSelectionListener(new SelectionAdapter() {
+	
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				String account_path = text01.getText();
+				String record_path = text02.getText();
+	
+				if (account_path.equals("") || record_path.equals(""))
+					return;
+	
+				MainClass.PATH_ACCOUNT_FLODER = account_path;
+	
+				if (record_path.endsWith("\\")) {
+					record_path = record_path + "result.xls";
+				} else if (!record_path.endsWith(".xls")) {
+					record_path = record_path + "\\result.xls";
+				}
+				MainClass.PATH_REPORT = record_path;
+				System.out.println("PATH_ACCOUNT_FLODER " + MainClass.PATH_ACCOUNT_FLODER);
+				System.out.println("PATH_RECORD " + MainClass.PATH_REPORT);
+	
+				button.setEnabled(false);
+				run(new Runnable() {
+	
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						MainClass.account();
+					}
+				}, new Runnable() {
+	
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						button.setEnabled(true);
+					}
+				});
+	
+			}
+		});
+		button.setBounds(438, 142, 135, 47);
+		button.setText("开始");
+	
+		Label label = new Label(shell, SWT.NONE);
+		label.setText("对账文件夹：");
+		label.setBounds(10, 36, 224, 20);
+	
+		Label label_1 = new Label(shell, SWT.NONE);
+		label_1.setText("结果集存放文件夹：");
+		label_1.setBounds(10, 116, 224, 20);
+	
+		table = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
+		table.setBounds(10, 234, 801, 609);
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true);
+	
+		table.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				int index = table.getSelectionIndex();
+			}
+		});
+		table_manager = new TableManager(table);
+	
+		combo = new Combo(shell, SWT.READ_ONLY);
+		combo.setItems(new String[] { "table_1", "table_2", "table_3" });
+		combo.setBounds(10, 200, 108, 54);
+		combo.select(0);
+	
+		Button btnSearch = new Button(shell, SWT.NONE);
+		btnSearch.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				table_manager.show();
+			}
+		});
+		btnSearch.setBounds(124, 198, 108, 30);
+		btnSearch.setText("检索");
+	
+	}
+
 	public static GUI getInstance() {
 		if (m_instance == null) {
 			m_instance = new GUI();
@@ -95,7 +285,6 @@ public class GUI {
 				messageBox.open();
 			}
 		});
-
 	}
 
 	/**
@@ -111,196 +300,6 @@ public class GUI {
 				display.sleep();
 			}
 		}
-	}
-
-	/**
-	 * Create contents of the window.
-	 */
-	protected void createContents() {
-		shell = new Shell();
-		shell.setSize(839, 891);
-		shell.setText("SWT Application");
-
-		text01 = new Text(shell, SWT.BORDER | SWT.H_SCROLL | SWT.CANCEL);
-		text01.setText("C:\\Users\\acer-pc\\Documents\\WeChat Files\\wxid_qyi4s5vkakv222\\Files\\对账2月3月(1)");
-		text01.setToolTipText("对账单文件夹 填入或拖入文件夹");
-		text01.setBounds(10, 63, 412, 47);
-
-		DropTarget dropTarget = new DropTarget(text01, DND.DROP_NONE);
-		Transfer[] transfer = new Transfer[] { FileTransfer.getInstance() };
-		dropTarget.setTransfer(transfer);
-		dropTarget.addDropListener(new DropTargetListener() {
-
-			@Override
-			public void dragEnter(DropTargetEvent arg0) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void dragLeave(DropTargetEvent arg0) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void dragOperationChanged(DropTargetEvent arg0) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void dragOver(DropTargetEvent arg0) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void drop(DropTargetEvent arg0) {
-				// TODO Auto-generated method stub
-				String[] files = (String[]) arg0.data;
-				text01.setText(files[0]);
-			}
-
-			@Override
-			public void dropAccept(DropTargetEvent arg0) {
-				// TODO Auto-generated method stub
-
-			}
-		});
-
-		text02 = new Text(shell, SWT.BORDER | SWT.H_SCROLL | SWT.CANCEL);
-		text02.setText("C:\\Users\\acer-pc\\Documents\\WeChat Files\\wxid_qyi4s5vkakv222\\Files\\对账2月3月(1)");
-		text02.setToolTipText("对账单文件夹 填入或拖入文件夹");
-		text02.setBounds(10, 142, 412, 47);
-
-		DropTarget dropTarget02 = new DropTarget(text02, DND.DROP_NONE);
-		Transfer[] transfer02 = new Transfer[] { FileTransfer.getInstance() };
-		dropTarget02.setTransfer(transfer02);
-		dropTarget02.addDropListener(new DropTargetListener() {
-
-			@Override
-			public void dragEnter(DropTargetEvent arg0) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void dragLeave(DropTargetEvent arg0) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void dragOperationChanged(DropTargetEvent arg0) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void dragOver(DropTargetEvent arg0) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void drop(DropTargetEvent arg0) {
-				// TODO Auto-generated method stub
-				String[] files = (String[]) arg0.data;
-				text02.setText(files[0]);
-			}
-
-			@Override
-			public void dropAccept(DropTargetEvent arg0) {
-				// TODO Auto-generated method stub
-
-			}
-		});
-
-		Label lblNewLabel = new Label(shell, SWT.NONE);
-		lblNewLabel.setBounds(10, 10, 224, 20);
-		lblNewLabel.setText("通过填写或拖拽来指定文件夹");
-
-		Button button = new Button(shell, SWT.NONE);
-		button.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				String account_path = text01.getText();
-				String record_path = text02.getText();
-
-				if (account_path.equals("") || record_path.equals(""))
-					return;
-
-				MainClass.PATH_ACCOUNT_FLODER = account_path;
-
-				if (record_path.endsWith("\\")) {
-					record_path = record_path + "result.xls";
-				} else if (!record_path.endsWith(".xls")) {
-					record_path = record_path + "\\result.xls";
-				}
-				MainClass.PATH_REPORT = record_path;
-				System.out.println("PATH_ACCOUNT_FLODER " + MainClass.PATH_ACCOUNT_FLODER);
-				System.out.println("PATH_RECORD " + MainClass.PATH_REPORT);
-
-				button.setEnabled(false);
-				run(new Runnable() {
-
-					@Override
-					public void run() {
-						// TODO Auto-generated method stub
-						MainClass.account();
-					}
-				}, new Runnable() {
-
-					@Override
-					public void run() {
-						// TODO Auto-generated method stub
-						button.setEnabled(true);
-					}
-				});
-
-			}
-		});
-		button.setBounds(438, 142, 135, 47);
-		button.setText("开始");
-
-		Label label = new Label(shell, SWT.NONE);
-		label.setText("对账文件夹：");
-		label.setBounds(10, 36, 224, 20);
-
-		Label label_1 = new Label(shell, SWT.NONE);
-		label_1.setText("结果集存放文件夹：");
-		label_1.setBounds(10, 116, 224, 20);
-
-		table = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
-		table.setBounds(10, 234, 801, 609);
-		table.setHeaderVisible(true);
-		table.setLinesVisible(true);
-
-		table.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				int index = table.getSelectionIndex();
-			}
-		});
-		table_manager = new TableManager(table);
-
-		combo = new Combo(shell, SWT.READ_ONLY);
-		combo.setItems(new String[] { "table_1", "table_2", "table_3" });
-		combo.setBounds(10, 200, 108, 54);
-		combo.select(0);
-
-		Button btnSearch = new Button(shell, SWT.NONE);
-		btnSearch.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				table_manager.show();
-			}
-		});
-		btnSearch.setBounds(124, 198, 108, 30);
-		btnSearch.setText("检索");
-
 	}
 
 	void run(final Runnable r1, final Runnable r2) {
