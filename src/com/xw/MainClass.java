@@ -238,6 +238,12 @@ public class MainClass {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			e.printStackTrace();
+			e.printStackTrace();
+			e.printStackTrace();
+			e.printStackTrace();
+			e.printStackTrace();
+			//GUI.getInstance().showErrDialog(e.getMessage());
 		}
 	}
 
@@ -324,7 +330,7 @@ public class MainClass {
 				if ((Double) sheet.read(row, 1) == 0) {
 					break;
 				}
-			} catch (ClassCastException e) {
+			} catch (Exception e) {
 				break;
 			}
 			HashMap<String, String> kv = new HashMap<>();
@@ -335,7 +341,7 @@ public class MainClass {
 				remark = FJ.convert(((String) _remark).trim(), 0);
 			} catch (Exception e) {
 				e.printStackTrace();
-				break;
+				remark="";
 			}
 			String staff_name = null;
 			for (String j : Config.getInstance().getStaffSet()) {
@@ -368,10 +374,10 @@ public class MainClass {
 					num = 0;
 				kv.put("应收减少", new BigDecimal(num).toString());
 				kv.put("备注", remark);
-				System.out.println("ValidData:|" + "i:" + i + "|" + sheet.read(row, 1) + "|" + remark);
+				//System.out.println("ValidData:|" + "i:" + i + "|" + sheet.read(row, 1) + "|" + remark);
 				dbm.put(Config.TABLE_2, kv);
 			} else {
-				System.out.println("IgnoreError|" + "i:" + i + "|" + sheet.read(row, 1) + "|" + remark);
+				//System.out.println("IgnoreError|" + "i:" + i + "|" + sheet.read(row, 1) + "|" + remark);
 			}
 			i++;
 			row = 9 + i - 1;

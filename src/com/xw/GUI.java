@@ -173,9 +173,9 @@ public class GUI {
 				MainClass.PATH_ACCOUNT_FLODER = account_path;
 	
 				if (record_path.endsWith("\\")) {
-					record_path = record_path + "result.xls";
+					record_path = record_path + "result.xlsx";
 				} else if (!record_path.endsWith(".xls")) {
-					record_path = record_path + "\\result.xls";
+					record_path = record_path + "\\result.xlsx";
 				}
 				MainClass.PATH_REPORT = record_path;
 				System.out.println("PATH_ACCOUNT_FLODER " + MainClass.PATH_ACCOUNT_FLODER);
