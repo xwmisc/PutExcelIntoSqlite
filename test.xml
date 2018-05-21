@@ -3,7 +3,7 @@
 
 <TableList>
 <table_1>
-<column name="款项类型"/><column name="应收减少"/><column name="姓名"/><column name="应收增加"/><column name="日期"/></table_1>
+</table_1>
 <table_2>
 <column name="款项类型"/><column name="应收减少"/><column name="姓名"/><column name="应收增加"/><column name="日期"/><column name="备注"/><column name="单据编号"/></table_2>
 <test/><table_3><column name="日期"/><column name="当日总刷货返点"/></table_3></TableList>

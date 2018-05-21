@@ -1,6 +1,7 @@
 package com.xw;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -34,8 +35,9 @@ public class Config {
 		try {
 			SAXReader reader = new SAXReader();
 			file = new File("test.xml");
-			document = reader.read(file);
-		} catch (DocumentException e) {
+			FileInputStream in = new FileInputStream(file);
+			document = reader.read(in);
+		} catch (DocumentException | FileNotFoundException e) {
 			e.printStackTrace();
 			throw new RuntimeException("cant read config file!");
 		}
@@ -66,7 +68,7 @@ public class Config {
 	void save() throws IOException  {
 		// System.out.println("Save config");
 		FileOutputStream os = new FileOutputStream(file);
-		os.write(document.asXML().getBytes());
+		os.write(document.asXML().getBytes("UTF-8"));
 		os.flush();
 		os.close();
 	}
